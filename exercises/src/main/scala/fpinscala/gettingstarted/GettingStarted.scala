@@ -140,13 +140,22 @@ object PolymorphicFunctions {
 
   // Exercise 2: Implement a polymorphic function to check whether
   // an `Array[A]` is sorted
-  def isSorted[A](as: Array[A], gt: (A,A) => Boolean): Boolean = ???
+  def isSorted[A](as: Array[A], gt: (A,A) => Boolean): Boolean = {
+    def go (position: Int, limit: Int): Boolean = {
+      if (position < limit) {
+        val greater = gt(as(position), as(position + 1))
+        if (greater) false
+        else go(position + 1, limit)
+      } else true
+    }
+    go(0, as.length - 1)
+  }
 
   // Polymorphic functions are often so constrained by their type
   // that they only have one implementation! Here's an example:
 
   def partial1[A,B,C](a: A, f: (A,B) => C): B => C =
-    (b: B) => f(a, b)
+    a => b => f(a, b)
 
   // Exercise 3: Implement `curry`.
 
@@ -175,4 +184,11 @@ object PolymorphicFunctions {
 
   def compose[A,B,C](f: B => C, g: A => B): A => C =
     ???
+
+  def main(args: Array[String]): Unit = {
+//    val arr = Array(1, 2, 3, 4, 5, 6, 7, 8)
+//    println(s"Is sorted for ${arr.deep.toString} is ${isSorted(arr, (a: Int, b: Int) => a > b)}")
+
+    val adder
+  }
 }
