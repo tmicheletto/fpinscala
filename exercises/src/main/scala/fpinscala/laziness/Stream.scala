@@ -49,6 +49,12 @@ trait Stream[+A] {
   // 5.7 map, filter, append, flatmap using foldRight. Part of the exercise is
   // writing your own function signatures.
 
+  def mapViaUnfold[B](f: A => B): Stream[B] =
+    unfold(this) {
+      case Cons(h, t) => Some(f(h()), t())
+      case Empty => None
+    }
+
   def startsWith[B](s: Stream[B]): Boolean = ???
 
   def toList: List[A] = {
@@ -109,7 +115,7 @@ object Stream {
     unfold(a)(_ => Some((a,a)))
   }
 
-  val ones = {
+  val onesViaUnfold = {
     unfold(1)(_ => Some((1,1)))
   }
 }
