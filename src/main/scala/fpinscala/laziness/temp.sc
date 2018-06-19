@@ -1,0 +1,1 @@
+fpinscala.laziness.Stream("A","B","C","D","E").takeViaUnfold(3).toList
