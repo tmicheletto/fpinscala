@@ -23,7 +23,10 @@ trait Stream[+A] {
     case _ => empty
   }
 
-  def drop(n: Int): Stream[A] = ???
+  def drop(n: Int): Stream[A] = this match {
+    case Cons(h,t) if n > 0 => t().drop(n - 1)
+    case _ => this
+  }
 
   def takeWhile(p: A => Boolean): Stream[A] =
     foldRight(empty[A])((h, t) => if (p(h)) cons(h, t) else empty)
@@ -62,8 +65,42 @@ trait Stream[+A] {
       case _ => None
     }
 
+  def zipWith[B,C](s2: Stream[B])(f: (A,B) => C): Stream[C] =
+    unfold((this,s2)) {
+      case (Cons(h1,t1), Cons(h2,t2)) => Some((f(h1(), h2())),(t1(), t2()))
+      case _ => None
+    }
 
-  def startsWith[B](s: Stream[B]): Boolean = ???
+  def zipAll[B](s2: Stream[B]): Stream[(Option[A],Option[B])] =
+    unfold((this, s2)) {
+      case (Cons(h1,t1), Cons(h2,t2)) => Some((Some(h1()), Some(h2())), (t1(), t2()))
+      case (Cons(h1,t1), Empty) => Some((Some(h1()), Option.empty[B]), (t1(), empty[B]))
+      case (Empty, Cons(h2, t2)) => Some(((Option.empty[A], Some(h2()))), (empty[A], t2()))
+      case (Empty, Empty) => None
+    }
+
+  def tails: Stream[Stream[A]] =
+    unfold(this) {
+      case Empty => None
+      case s => Some((s, s drop 1))
+    } append Stream(empty)
+
+
+  def hasSubsequence[A](sub: Stream[A]): Boolean =
+    tails exists (_ startsWith sub)
+
+
+  def startsWith[B](s: Stream[B]): Boolean =
+    zipAll(s).takeWhile(!_._2.isEmpty) forAll {
+      case (h, h2) => h == h2
+    }
+
+  def scanRight[B](z: B)(f: (A, => B) => B): Stream[B] =
+    foldRight((z, Stream(z)))((a, p0) => {
+      lazy val p1 = p0
+      val b2 = f(a, p1._1)
+      (b2, cons(b2, p1._2))
+    })._2
 
   def toList: List[A] = {
     this match {

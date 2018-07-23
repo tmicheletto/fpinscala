@@ -1,3 +1,5 @@
-import fpinscala.laziness._
+import fpinscala.state.State.Candy
+import fpinscala.state._
 
-Stream(1,2,3,4,5).takeViaUnfold(2).toList
+val s = Candy.simulateMachine(List(Coin, Turn, Coin, Turn, Coin, Turn, Coin, Turn))
+s.run(Machine(true, 5, 10))
